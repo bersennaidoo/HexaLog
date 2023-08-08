@@ -9,6 +9,7 @@ import (
 	api "github.com/bersennaidoo/HexaLog/cmd/api/v1"
 	"github.com/bersennaidoo/HexaLog/config"
 	"github.com/bersennaidoo/HexaLog/internal/app"
+	"github.com/bersennaidoo/HexaLog/internal/service/repo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +21,7 @@ func TestSegment(t *testing.T) {
 
 	c := config.Config{}
 	c.Segment.MaxStoreBytes = 1024
-	c.Segment.MaxIndexBytes = entWidth * 3
+	c.Segment.MaxIndexBytes = repo.EntWidth * 3
 
 	s, err := app.NewSegment(dir, 16, c)
 	require.NoError(t, err)
