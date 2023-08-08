@@ -19,7 +19,7 @@ type Store struct {
 	File *os.File
 	mu   sync.Mutex
 	buf  *bufio.Writer
-	size uint64
+	Size uint64
 }
 
 func NewStore(f *os.File) (*Store, error) {
@@ -32,7 +32,7 @@ func NewStore(f *os.File) (*Store, error) {
 
 	return &Store{
 		File: f,
-		size: size,
+		Size: size,
 		buf:  bufio.NewWriter(f),
 	}, nil
 }
@@ -41,7 +41,7 @@ func (s *Store) Append(p []byte) (n uint64, pos uint64, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	pos = s.size
+	pos = s.Size
 
 	if err := binary.Write(s.buf, Enc, uint64(len(p))); err != nil {
 		return 0, 0, err
@@ -53,7 +53,7 @@ func (s *Store) Append(p []byte) (n uint64, pos uint64, err error) {
 	}
 
 	w += LenWidth
-	s.size += uint64(w)
+	s.Size += uint64(w)
 
 	return uint64(w), pos, nil
 }
@@ -100,4 +100,8 @@ func (s *Store) Close() error {
 	}
 
 	return s.File.Close()
+}
+
+func (s *Store) Name() string {
+	return s.File.Name()
 }

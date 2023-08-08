@@ -17,7 +17,7 @@ var (
 type Index struct {
 	File *os.File
 	mmap gommap.MMap
-	size uint64
+	Size uint64
 }
 
 func NewIndex(f *os.File, c config.Config) (*Index, error) {
@@ -30,7 +30,7 @@ func NewIndex(f *os.File, c config.Config) (*Index, error) {
 		return nil, err
 	}
 
-	idx.size = uint64(fi.Size())
+	idx.Size = uint64(fi.Size())
 	if err = os.Truncate(
 		f.Name(), int64(c.Segment.MaxIndexBytes),
 	); err != nil {
@@ -57,7 +57,7 @@ func (i *Index) Close() error {
 		return err
 	}
 
-	if err := i.File.Truncate(int64(i.size)); err != nil {
+	if err := i.File.Truncate(int64(i.Size)); err != nil {
 		return err
 	}
 
@@ -65,18 +65,18 @@ func (i *Index) Close() error {
 }
 
 func (i *Index) Read(in int64) (out uint32, pos uint64, err error) {
-	if i.size == 0 {
+	if i.Size == 0 {
 		return 0, 0, io.EOF
 	}
 
 	if in == -1 {
-		out = uint32((i.size / EntWidth) - 1)
+		out = uint32((i.Size / EntWidth) - 1)
 	} else {
 		out = uint32(in)
 	}
 
 	pos = uint64(out) * EntWidth
-	if i.size < pos+EntWidth {
+	if i.Size < pos+EntWidth {
 		return 0, 0, io.EOF
 	}
 
@@ -87,14 +87,14 @@ func (i *Index) Read(in int64) (out uint32, pos uint64, err error) {
 }
 
 func (i *Index) Write(off uint32, pos uint64) error {
-	if uint64(len(i.mmap)) < i.size+EntWidth {
+	if uint64(len(i.mmap)) < i.Size+EntWidth {
 		return io.EOF
 	}
 
-	Enc.PutUint32(i.mmap[i.size:i.size+OffWidth], off)
-	Enc.PutUint64(i.mmap[i.size+OffWidth:i.size+EntWidth], pos)
+	Enc.PutUint32(i.mmap[i.Size:i.Size+OffWidth], off)
+	Enc.PutUint64(i.mmap[i.Size+OffWidth:i.Size+EntWidth], pos)
 
-	i.size += uint64(EntWidth)
+	i.Size += uint64(EntWidth)
 
 	return nil
 }
